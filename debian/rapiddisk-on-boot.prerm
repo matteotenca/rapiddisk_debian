@@ -6,12 +6,21 @@ case "$1" in
 		rapiddisk-on-boot --global-uninstall || true
 		;;
 	upgrade)
-		hooks_dir="/usr/share/initramfs-tools/hooks"
-		installations="$(for k in "$(ls 2>/dev/null /usr/share/initramfs-tools/hooks/rapiddisk_kernel* | grep -oP 'kernel_.*$' | sed 's/kernel_//')" ; do echo "$k"; done)"
+	  old_config_dir="/usr/share/initramfs-tools/hooks"
+	  config_dir="/etc/rapiddisk-on-boot"
+	  # moves configurations from 0.1.x to 0.2.x format/place
+    old_installations="$(ls 2>/dev/null ${old_config_dir}/rapiddisk_kernel_* | grep -oP 'rapiddisk_kernel_.*$')"
+    ii=800
+    for oldcfg in $old_installations ; do
+      mv ${old_config_dir}/${oldcfg} ${config_dir:?}/${oldcfg}.${ii}
+      ii=$((ii+1))
+    done
+		installations="$(for k in "$(ls 2>/dev/null ${config_dir:?}/rapiddisk_kernel* | grep -oP 'kernel_.*$' | sed	's/kernel_//')" ; do echo "$k"; done)"
 		for inst in $installations ; do
-			current_file="${hooks_dir:?}/rapiddisk_kernel_${inst}"
+			current_file="${config_dir:?}/rapiddisk_kernel_${inst}"
+			kernel_version=$(echo $inst | sed -r 's/\.[[:digit:]]+$//')
 			file="$file ${current_file}"
-			kernel="$kernel $inst"
+			kernel="$kernel $kernel_version"
 			size="$size $(head -n 1 "$current_file")"
 			device="$device $(head -n 2 "$current_file" | tail -n 1)"
 			cache_mode="$cache_mode $(tail -n 1 "$current_file")"
@@ -25,12 +34,23 @@ case "$1" in
 				s=$(echo $size | cut --delimiter=" " --field=$i)
 				c=$(echo $cache_mode | cut --delimiter=" " --field=$i)
 				d=$(echo $device | cut --delimiter=" " --field=$i)
-				echo >>/tmp/rapiddisk-insts "rapiddisk-on-boot --install --kernel=${k} --size=${s} --cache-mode=${c} --root=${d} --force"
+				echo >>/tmp/rapiddisk-insts "rapiddisk-on-boot >/dev/null --install --kernel=${k} --size=${s} --cache-mode=${c} --root=${d} --force --no-initramfs"
 				i=$((i+1))
 			done
 		fi
-		rapiddisk-on-boot --global-uninstall --no-initramfs || true
+
+    # get rid of 0.1.x installation files
+    [ -d /usr/share/rapiddisk-on-boot ] && rm -rf /usr/share/rapiddisk-on-boot
+    [ -f /usr/share/initramfs-tools/hooks/rapiddisk_hook ] && rm -f /usr/share/initramfs-tools/hooks/rapiddisk_hook
+    [ -f /usr/share/initramfs-tools/scripts/init-premount/rapiddisk_boot ] && rm -f /usr/share/initramfs-tools/scripts/init-premount/rapiddisk_boot
+    [ -f /usr/share/initramfs-tools/hooks/rapiddisk_sub.orig ] && rm -f /usr/share/initramfs-tools/hooks/rapiddisk_sub.orig
+    [ -f /usr/share/initramfs-tools/scripts/local-bottom/rapiddisk_clean ] && rm -f /usr/share/initramfs-tools/scripts/local-bottom/rapiddisk_clean
+
+		kernel_unique="$(echo $kernel |sed 's/ /\n/g'| sort -u)"
+		for k in $kernel_unique ; do
+			echo >>/tmp/rapiddisk-insts "update-initramfs -u -k $k"
+		done
+		rapiddisk-on-boot >/dev/null --global-uninstall --no-initramfs || true
 		;;
 esac
 exit 0
-

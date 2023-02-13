@@ -2,5 +2,5 @@
 
 # We're passed the version of the kernel being removed
 inst_kern=$1
-rapiddisk-on-boot --uninstall --kernel="$inst_kern" --skip-kernel-check --force || true
+rapiddisk-on-boot --uninstall --kernel="$inst_kern" --skip-kernel-check --force --all || true
 exit 0

@@ -1,2 +1,1 @@
-scripts/rapiddisk-rootdev/rapiddisk-on-boot usr/sbin
-scripts/rapiddisk-rootdev/ubuntu usr/share/rapiddisk-on-boot
+scripts/rapiddisk-rootdev/0.2.x/rapiddisk-on-boot usr/sbin
