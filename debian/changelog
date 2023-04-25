@@ -14,6 +14,8 @@ rapiddisk (9.1.0-1) UNRELEASED; urgency=medium
 
   [Matteo Tenca]
   * New upstream release.
+  * Added new Build-Depends 'dh-sequence-dkms', needed starting with Ubuntu 22.10 Kinetic,
+    since 'dh-dkms' is now a separate package. Before was included in the 'dkms' package.
 
  -- Matteo Tenca <matteo.tenca@gmail.com>  Mon, 28 Apr 2023 00:00:00 +0000
 
