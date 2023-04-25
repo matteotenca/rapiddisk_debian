@@ -4,7 +4,10 @@
 
 **Rapiddisk is written and updated by Petros Koutoupis <petros@petroskoutoupis.com>**
 
-**Ubuntu PPA**: https://launchpad.net/~matteotenca/+archive/ubuntu/rapiddisk
+### Ubuntu PPA:
+### https://launchpad.net/~matteotenca/+archive/ubuntu/rapiddisk
+
+**Ubuntu PPA is maintained by Matteo Tenca <matteo.tenca@gmail.com>**
 
 ##### Notes
 * Versions of the releases match the ones of rapiddisk
